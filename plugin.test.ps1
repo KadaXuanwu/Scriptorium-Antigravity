@@ -134,17 +134,23 @@ try {
     Assert-Equal ((Split-Path $command.FilePath -Leaf) -replace '\.cmd$', '') 'agy' 'the agy command on the PATH'
     Assert-Equal ($command.Arguments -join ' ') "-p `"Do ticket #5.`" --output-format stream-json --model gemini-4-hydrogen-high --settings `"$settingsFile`" --add-dir `"D:/Work/App-w1`"" 'the arguments of a run'
     $allowed = @((Get-Content $settingsFile -Raw | ConvertFrom-Json).permissions.allow)
-    $words = '( +("[^"`$]*"|''[^'']*''|[^\s;|&<>`$(){}"'']+))*'
+    $words = '( +("[^"`$]*"|''[^'']*''|[^\s;|&<>`$()"'']+))*'
     Assert-Equal ($allowed -join ' ') "command(git) command(regex:git$words) command(gh) command(regex:gh$words) command(unity command) command(regex:unity command$words) read_url(github.com)" 'the run''s rules'
     # The pattern covers a whole line, as Antigravity reads it: the command with plain words and quoted text.
     $line = '^(?:' + $allowed[1].Substring('command(regex:'.Length).TrimEnd(')') + ')$'
     foreach ($passes in @('git', 'git add docs/PROVIDERS.md', 'git commit -m "probe (two); x"', "git commit -m 'it costs `$5'",
-            "git stash drop 'stash@{0}'", 'git push -u origin t11')) {
+            "git stash drop 'stash@{0}'", 'git log HEAD@{1}', 'git push -u origin t11')) {
         Assert-Equal ($passes -match $line) $true "a line the rule covers: $passes"
+    }
+    # The base playbook's own lines with braces and a quoted filter, under the rule of `gh`.
+    $ghLine = '^(?:' + $allowed[3].Substring('command(regex:'.Length).TrimEnd(')') + ')$'
+    foreach ($passes in @('gh api --silent -X POST repos/{owner}/{repo}/issues/comments/7/reactions -f content=eyes',
+            "gh api repos/{owner}/{repo}/issues/11/comments --jq '.[] | select(.author_association | IN(`"OWNER`")) | {id, body}'")) {
+        Assert-Equal ($passes -match $ghLine) $true "a line the rule covers: $passes"
     }
     foreach ($refused in @('git status; hostname', 'git status && hostname', 'git log | more', 'git log > x.txt',
             'git commit -m "a $(hostname)"', 'git commit -m "a `b"', 'git add (hostname)', 'git add $env:X', 'gitk',
-            "git status`nhostname", 'git stash drop stash@{0}')) {
+            "git status`nhostname")) {
         Assert-Equal ($refused -match $line) $false "a line the rule does not cover: $refused"
     }
     Assert-Equal "$($command.Env.Count) $($said[-1])" '0 Antigravity gets no MCP servers from the plugins yet: Docs' 'no variable, and the MCP server named in the log'

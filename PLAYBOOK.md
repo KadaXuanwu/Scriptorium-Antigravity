@@ -13,7 +13,7 @@ added folder, so it is not in your context: read it in step 2.
 and every `gh` command outside the sandbox from the start, and alone: one `git` or `gh` command in one call, never
 chained with another command. Its line is allowed when it is the command with plain words and quoted text:
 
-- Outside quotes: no `;`, `|`, `&`, `<`, `>`, `$`, backtick, parenthesis or brace.
+- Outside quotes: no `;`, `|`, `&`, `<`, `>`, `$`, backtick or parenthesis.
 - Inside double quotes: no `$` and no backtick. Put such text in single quotes, or in a file that the command reads
   (`--body-file`, `-F`).
 

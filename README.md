@@ -115,7 +115,8 @@ Not proven:
 4. A paid plan: its models, its 5-hour window (the plugin reads every `gemini-` window that `/usage` names, and
    `models.json` knows only the week), and whether its auto mode behaves like the free plan's.
 5. A folder that Antigravity does not trust yet, with nobody there.
-6. macOS and Linux, and PowerShell 7 outside this repo's CI.
+6. macOS and Linux, and PowerShell 7 outside this repo's CI. There the rule by a command's start should count, and
+   the pattern for the whole line is not tried.
 
 ## Token savings
 

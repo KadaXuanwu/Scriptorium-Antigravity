@@ -19,10 +19,11 @@ $RuleActions = 'read_file|write_file|read_url|execute_url|command|unsandboxed|mc
 
 # What may follow a command's name on a line that a rule covers whole (Get-RunCommand): words with no shell operator
 # in them, text in single quotes, and text in double quotes that the shell does not expand (no `$`, no backtick). So
-# no chain, no pipe, no redirection and no command inside the command.
+# no chain, no pipe, no redirection and no command inside the command. Braces pass: no shell runs what is in them,
+# and `gh api` and git's own names use them (`repos/{owner}/{repo}`, `HEAD@{1}`).
 # shortcut: an option of the command that runs a program (git -c core.pager=...) passes, as under the plain rule of
 # another shell's provider; name such options here when a run must not be trusted with them.
-$RuleWords = '( +("[^"`$]*"|''[^'']*''|[^\s;|&<>`$(){}"'']+))*'
+$RuleWords = '( +("[^"`$]*"|''[^'']*''|[^\s;|&<>`$()"'']+))*'
 
 # One line of a log as an object, $null for a line that is no event.
 function Read-Event([string] $line) {
