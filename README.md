@@ -56,7 +56,10 @@ A run gets its rules for itself alone: the plugin writes them into `run-settings
 and hands that file over with `--settings`, which saves nothing. The owner's own
 `~/.gemini/antigravity-cli/settings.json` is never written.
 
-- Each command the base and the plugins allow becomes a rule: `git` becomes `command(git)`.
+- Each command the base and the plugins allow becomes two rules. `git` becomes `command(git)`, which covers a line
+  by how it starts, and a pattern for the whole line: the command, then plain words and quoted text, with no chain,
+  pipe, redirection or command inside the command. Antigravity takes the first only in a shell whose lines it can
+  split into words. In Windows PowerShell a rule must cover the whole line, so there the second one counts.
 - A rule from `allowedTools` in `scriptorium.json` is handed on when it is in Antigravity's syntax
   (`read_url(github.com)`), and left out when it is another tool's.
 - No mode is set. Seen with nobody there on a free plan: file edits ran, a command with no rule (`dotnet --version`)
@@ -64,8 +67,13 @@ and hands that file over with `--settings`, which saves nothing. The owner's own
   the action: the plugin reads that as the run's failure.
 
 Antigravity runs a command inside a sandbox that cannot write to `.git` and has no network. The run's playbook
-(`PLAYBOOK.md`) therefore tells it to start each `git` and `gh` command outside the sandbox, alone in its call: an
-allow rule covers a command by how it starts, and a chained command line is refused.
+(`PLAYBOOK.md`) therefore tells it to start each `git` and `gh` command outside the sandbox, alone in its call, and
+which lines the rules cover.
+
+With no mode set, a run is in Antigravity's Auto mode where the plan has it. There a model of Antigravity's reviews
+each command that asks to leave the sandbox. When the review says no, or fails, Antigravity asks the user, and a
+rule that covers the line answers for the user. A line that no rule covers has nobody to answer: the run ends there.
+The review still runs for a line that a rule covers, so the rules save none of its requests.
 
 ## What Antigravity does not give
 
@@ -87,7 +95,12 @@ Proven with agy 1.5.17 on Windows, a free plan, on 2026-11-25:
 - A run's log: the session, the steps, the tokens of each request, the result.
 - A resume with `--conversation` and a new prompt.
 - A run that writes a file and commits it with the playbook's sandbox rule: no command failed.
-- The rules of `--settings`: a `git` command passes outside the sandbox, a chained one is refused and ends the run.
+- The rules of `--settings` on Windows. With `command(git)` alone, no `git` line had a rule: each passed or failed
+  by Auto mode's review, and a review that got the service's shortage (error 503) ended the run at `git add`. With
+  the pattern for the whole line beside it, the same lines ran while the review failed, and so did one that the
+  review had refused twice (`git stash drop`).
+- The base's own playbook as the prompt, from the worker's logon task: the run read the ticket, made its branch and
+  made the ticket's edit. It ended at `git add`, before the rule above.
 - `/usage` with nobody there: the week of the Gemini models, its share left and its reset.
 - `/compact` on a named session.
 - An unknown model, and the service's own shortage (error 503) in the middle of a session. The plugin reads the
@@ -96,7 +109,7 @@ Proven with agy 1.5.17 on Windows, a free plan, on 2026-11-25:
 
 Not proven:
 
-1. A whole ticket: `git push` and `gh pr create` from a worker copy, and the base's own playbook as the prompt.
+1. A whole ticket to its end: `git push` and `gh pr create` from a worker copy, and the merge.
 2. A run at the plan's limit: the wording is taken from the service's names for it, not from a log.
 3. A run without a login: the wording is from Antigravity's docs.
 4. A paid plan: its models, its 5-hour window (the plugin reads every `gemini-` window that `/usage` names, and

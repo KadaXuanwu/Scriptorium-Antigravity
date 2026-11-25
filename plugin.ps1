@@ -17,6 +17,13 @@
 # The actions of a rule that Antigravity reads (`command(git)`, `write_file(src/)`).
 $RuleActions = 'read_file|write_file|read_url|execute_url|command|unsandboxed|mcp'
 
+# What may follow a command's name on a line that a rule covers whole (Get-RunCommand): words with no shell operator
+# in them, text in single quotes, and text in double quotes that the shell does not expand (no `$`, no backtick). So
+# no chain, no pipe, no redirection and no command inside the command.
+# shortcut: an option of the command that runs a program (git -c core.pager=...) passes, as under the plain rule of
+# another shell's provider; name such options here when a run must not be trusted with them.
+$RuleWords = '( +("[^"`$]*"|''[^'']*''|[^\s;|&<>`$(){}"'']+))*'
+
 # One line of a log as an object, $null for a line that is no event.
 function Read-Event([string] $line) {
     if ($line -notmatch '^\s*\{.*"event"') {
@@ -163,9 +170,13 @@ function Read-UsageText([string] $text) {
 # (`--settings` saves nothing).
 # - No `--mode`. Seen with nobody there on a free plan: file edits and a command with no rule ran, and an action that
 #   needed approval was refused and ended the run: the result names it (`denied_actions`). `--mode auto` printed that
-#   the account has no such mode.
-# - The rules: each command of the run as `command(<start>)`, and each rule that the project gives in Antigravity's
-#   own syntax. A rule in another tool's syntax is left out.
+#   the account has no such mode; a run with no mode is in Auto mode all the same, as Antigravity's own log names it.
+# - The rules: two for each command of the run, and each rule that the project gives in Antigravity's own syntax. A
+#   rule in another tool's syntax is left out. `command(git)` covers a line by how it starts, which Antigravity
+#   allows only in a shell whose lines it can split into words. In Windows PowerShell and cmd a rule must cover the
+#   whole line, so the second rule is a pattern for the whole line (Antigravity's docs: permissions, CLI
+#   cross-platform command matching). Seen without it on Windows: no `git` line had a rule, each waited for Auto
+#   mode's review of a command that leaves the sandbox, and a review that failed or said no ended the run.
 # - `Run.Login` is not used: Antigravity keeps one login for each OS user, in the OS keyring.
 # shortcut: the plugins' MCP servers are not handed over: Antigravity reads them from .agents/mcp_config.json inside
 # the checkout, a file of the repo. Write it when an environment plugin gives a server.
@@ -174,7 +185,10 @@ function Get-RunCommand($ctx, [switch] $Compact) {
     if ($run.McpServers -and $run.McpServers.Count) {
         & $ctx.Log "Antigravity gets no MCP servers from the plugins yet: $(@($run.McpServers.Keys) -join ', ')"
     }
-    $rules = @($run.Commands | Where-Object { $_ } | ForEach-Object { "command($($_.Trim()))" }) +
+    $rules = @($run.Commands | Where-Object { $_ } | ForEach-Object { $_.Trim() } | ForEach-Object {
+            "command($_)"
+            "command(regex:$([regex]::Escape($_) -replace '\\ ', ' ')$RuleWords)"
+        }) +
         @($run.Tools | Where-Object { $_ -match "^($RuleActions)\(.+\)$" })
     $runSettings = Join-Path $ctx.QueueDir 'run-settings.json'
     [System.IO.File]::WriteAllText($runSettings, '{"permissions":{"allow":' + (ConvertTo-Json -InputObject @($rules | Select-Object -Unique) -Compress) + '}}')

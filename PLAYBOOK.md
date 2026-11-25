@@ -11,11 +11,14 @@ added folder, so it is not in your context: read it in step 2.
 
 **The sandbox.** Your commands run inside a sandbox that cannot write to `.git` and has no network. So run every `git`
 and every `gh` command outside the sandbox from the start, and alone: one `git` or `gh` command in one call, never
-chained with another command. That is allowed for a command that starts with `git` or `gh`. A chained one needs an
-approval that nobody is there to give, and the run ends.
+chained with another command. Its line is allowed when it is the command with plain words and quoted text:
 
-**A refused action.** Nobody is there to approve an action. When Antigravity refuses one that the job needs, do not
-look for a way around it: say in a comment on the ticket which action was refused, and end.
+- Outside quotes: no `;`, `|`, `&`, `<`, `>`, `$`, backtick, parenthesis or brace.
+- Inside double quotes: no `$` and no backtick. Put such text in single quotes, or in a file that the command reads
+  (`--body-file`, `-F`).
+
+Any other line that leaves the sandbox needs an approval that nobody is there to give, and Antigravity ends the run
+at once. So does every other command that you start outside the sandbox: start none.
 
 **Compaction.** Antigravity compacts your context when it grows large: the checkpoint's commit and `progress.json` are
 what you find again after it (Checkpoints).
