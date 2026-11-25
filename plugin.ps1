@@ -49,6 +49,12 @@ function Get-ResultText($result) {
     return [string]$result.response
 }
 
+# Whether a result is a failure: any status but a success, and a success that an action nobody could approve ended
+# (Antigravity ends the run there with no words). A run that was refused an action and still finished is a success.
+function Test-Failed($result) {
+    return [bool]($result.status -ne 'SUCCESS' -or ($result.denied_actions -and -not $result.response))
+}
+
 # Why a run that ended with an error is not its ticket's failure (the base's kinds, Scriptorium's limits.ps1): 'login'
 # (not signed in), 'model' (the account cannot use the model), 'limit' (the service takes no request now: the run is
 # held and resumes later) or 'start' (the session made no request, for a cause the text does not name). '' for the
@@ -155,8 +161,9 @@ function Read-UsageText([string] $text) {
 # The command of a run, or with -Compact of the compaction of its session: @{ FilePath; Arguments; Env }. It writes
 # the run's settings into the worker's queue folder: run-settings.json, the allow rules of this run alone
 # (`--settings` saves nothing).
-# - No `--mode`: Antigravity starts a run with nobody there in its auto mode where the account has one. File edits and
-#   safe commands then run, and an action that needs approval is refused: the result names it (`denied_actions`).
+# - No `--mode`. Seen with nobody there on a free plan: file edits and a command with no rule ran, and an action that
+#   needed approval was refused and ended the run: the result names it (`denied_actions`). `--mode auto` printed that
+#   the account has no such mode.
 # - The rules: each command of the run as `command(<start>)`, and each rule that the project gives in Antigravity's
 #   own syntax. A rule in another tool's syntax is left out.
 # - `Run.Login` is not used: Antigravity keeps one login for each OS user, in the OS keyring.
@@ -238,7 +245,7 @@ function Get-RunCommand($ctx, [switch] $Compact) {
             & $ctx.Log "run numbers error: $_"
         }
         if ($result) {
-            $run.Error = $result.status -ne 'SUCCESS'
+            $run.Error = Test-Failed $result
             # The session's whole usage: a resumed one that is refused at once still did work before.
             $run.Worked = [long]$result.usage.total_tokens -gt 0
             $run.Text = Get-ResultText $result
@@ -266,6 +273,6 @@ function Get-RunCommand($ctx, [switch] $Compact) {
         } else {
             ''
         }
-        return @{ Error = [bool]($status -ne 'SUCCESS' -or $result.denied_actions); Detail = $detail; Text = (Get-ResultText $result) }
+        return @{ Error = (Test-Failed $result); Detail = $detail; Text = (Get-ResultText $result) }
     }
 }

@@ -50,8 +50,9 @@ and hands that file over with `--settings`, which saves nothing. The owner's own
 - Each command the base and the plugins allow becomes a rule: `git` becomes `command(git)`.
 - A rule from `allowedTools` in `scriptorium.json` is handed on when it is in Antigravity's syntax
   (`read_url(github.com)`), and left out when it is another tool's.
-- No mode is set. With nobody there Antigravity starts in its auto mode where the account has one: file edits and
-  safe commands run, and an action that needs approval is refused. The run then ends, and its result names the action.
+- No mode is set. Seen with nobody there on a free plan: file edits ran, a command with no rule (`dotnet --version`)
+  ran inside the sandbox, and an action that needed approval was refused. The run ended there, and its result named
+  the action: the plugin reads that as the run's failure.
 
 Antigravity runs a command inside a sandbox that cannot write to `.git` and has no network. The run's playbook
 (`PLAYBOOK.md`) therefore tells it to start each `git` and `gh` command outside the sandbox, alone in its call: an
@@ -63,7 +64,7 @@ The page's Details tab shows the same under Coding tool.
 
 | Feature of the base | With Antigravity | So |
 | ------------------- | ---------------- | -- |
-| A usage reading inside a run's log | The log holds none; only `/usage` does | The usage is read between runs. A stop line is not seen while a run works |
+| A usage reading inside a run's log | The log holds none; only `/usage` does | A worker reads the usage before it takes a job, when the last reading is older than 30 minutes. A stop line is not seen while a run works. The page's Ping shows that the login answers and saves no reading |
 | Several accounts on one PC | One login for each OS user | Every account of the page is the same login |
 | Sign-in and sign-out from the page | The first sign-in needs a terminal | The page offers none |
 | The plan's name and size | Not in a file | Every account counts as signed in, on a plan of size 1 |
@@ -80,7 +81,8 @@ Proven with agy 1.5.17 on Windows, a free plan, on 2026-11-25:
 - The rules of `--settings`: a `git` command passes outside the sandbox, a chained one is refused and ends the run.
 - `/usage` with nobody there: the week of the Gemini models, its share left and its reset.
 - `/compact` on a named session.
-- An unknown model, and the service's own shortage (error 503) in the middle of a session.
+- An unknown model, and the service's own shortage (error 503) in the middle of a session. The plugin reads the
+  shortage as a limit: the base holds the job with its session and resumes it after 30 minutes.
 - A model's name with `--effort` beside it is refused.
 
 Not proven:
