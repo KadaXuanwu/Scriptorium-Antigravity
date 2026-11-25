@@ -3,8 +3,9 @@
 A provider plugin for [Scriptorium](https://github.com/KadaXuanwu/Scriptorium): it runs the queue's workers on
 Google's Antigravity CLI (`agy`) with a Google AI plan.
 
-**Status: its hooks work with the real tool, and no ticket has run through it yet.** Checked on 2026-11-25 against
-agy 1.5.17 on Windows with a free plan ([Proven and not](#proven-and-not)). A worker runs on Antigravity when its
+**Status: its hooks work with the real tool, and one small ticket has run through it, from the queue to its merged
+pull request.** Checked on 2026-11-25 against agy 1.5.17 on Windows with a free plan
+([Proven and not](#proven-and-not)). A worker runs on Antigravity when its
 account is an Antigravity account, beside workers on another coding tool in the same project (Scriptorium's
 `docs/QUEUE.md`, Settings, `accounts.<name>.provider`).
 
@@ -18,11 +19,14 @@ account is an Antigravity account, beside workers on another coding tool in the 
 
 ## Use it
 
-1. Add the plugin to one project's `scriptorium.json`, after its other plugins, until the plugin is listed by name:
+1. Add the plugin to one project's `scriptorium.json`, after its other plugins:
 
    ```json
-   "antigravity": { "source": "https://github.com/KadaXuanwu/Scriptorium-Antigravity" }
+   "antigravity": {}
    ```
+
+   Scriptorium lists the plugin by name. A Scriptorium from before that needs the source in the entry:
+   `{ "source": "https://github.com/KadaXuanwu/Scriptorium-Antigravity" }`.
 
 2. Run Scriptorium's `setup.ps1` for that project again. It installs the plugin, and the workers of every project on
    the PC can then run on it.
@@ -99,8 +103,9 @@ Proven with agy 1.5.17 on Windows, a free plan, on 2026-11-25:
   by Auto mode's review, and a review that got the service's shortage (error 503) ended the run at `git add`. With
   the pattern for the whole line beside it, the same lines ran while the review failed, and so did one that the
   review had refused twice (`git stash drop`).
-- The base's own playbook as the prompt, from the worker's logon task: the run read the ticket, made its branch and
-  made the ticket's edit. It ended at `git add`, before the rule above.
+- A whole ticket of size S, with the base's own playbook as the prompt, from the worker's logon task: the run read
+  the ticket, made its branch and the ticket's edit, committed, rebased, pushed and opened its pull request, and the
+  merger merged it. A first run of the same ticket ended at `git add`, before the rule above.
 - `/usage` with nobody there: the week of the Gemini models, its share left and its reset.
 - `/compact` on a named session.
 - An unknown model, and the service's own shortage (error 503) in the middle of a session. The plugin reads the
@@ -109,7 +114,9 @@ Proven with agy 1.5.17 on Windows, a free plan, on 2026-11-25:
 
 Not proven:
 
-1. A whole ticket to its end: `git push` and `gh pr create` from a worker copy, and the merge.
+1. A ticket whose checks must pass inside the sandbox. Scriptorium's own `check.ps1` fails there: one test starts
+   a background job, which the sandbox denies. The run opened its pull request all the same, and its text did not
+   name the failed test.
 2. A run at the plan's limit: the wording is taken from the service's names for it, not from a log.
 3. A run without a login: the wording is from Antigravity's docs.
 4. A paid plan: its models, its 5-hour window (the plugin reads every `gemini-` window that `/usage` names, and
