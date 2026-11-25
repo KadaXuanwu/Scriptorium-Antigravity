@@ -167,6 +167,20 @@ try {
     Assert-Equal "$((Get-Location).Path -ne $root)" 'True' 'the probe leaves the folder as it was'
     $line = & $hooks.Compact (New-Context @{ Run = $held; Log = (Join-Path $root 'compact.jsonl') })
     Assert-Equal $line 'the session is compacted.' 'a compaction'
+
+    # The login's email, from agy's own logs: the newest log that has the sign-in line, a newer one without it passed
+    # over; none with no log that names it, and with no folder.
+    $logs = Join-Path $root 'log'
+    New-Item -ItemType Directory -Force $logs | Out-Null
+    Set-Content (Join-Path $logs 'cli-20260101_000000.log') 'I0101 00:00:00.1 1 server_oauth.go:226] OAuth: authenticated successfully as old@example.com'
+    Set-Content (Join-Path $logs 'cli-20260102_000000.log') @('I0102 start', 'I0102 00:00:00.1 1 server_oauth.go:226] OAuth: authenticated successfully as new@example.com', 'I0102 more')
+    Set-Content (Join-Path $logs 'cli-20260103_000000.log') 'I0103 a start that has not signed in yet'
+    Set-Content (Join-Path $logs 'cli.log') 'cli-20260103_000000.log'
+    $read = { param($dir) & $module { param($dir) Get-LogEmail $dir } $dir }
+    Assert-Equal (& $read $logs) 'new@example.com' 'the email of the newest log that names it'
+    Assert-Equal "'$(& $read $queue)' '$(& $read (Join-Path $root 'none'))'" "'' ''" 'no email with no log that names it, and with no folder'
+    $login = & $hooks.GetLogin (New-Context @{ Login = '' })
+    Assert-Equal "$($login.SignedIn) $($login.PlanSize) '$($login.Plan)' $($login.Email -eq $login.Stamp)" "True 1 '' True" 'a login counts as signed in, on a plan of size 1, with its email as its stamp'
 } finally {
     Remove-Item $root -Recurse -Force -ErrorAction SilentlyContinue
 }

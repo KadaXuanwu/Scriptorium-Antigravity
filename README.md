@@ -45,6 +45,7 @@ set are that provider's.
 | `GetCommand` | The command of a run: `agy -p` with the prompt, `--output-format stream-json`, the model, `--settings` with the run's own rules, `--conversation` for a session to resume, and `--add-dir` for each other folder |
 | `ReadRun` | The run's end from its log: the session, whether it ended, its error and why (not signed in, a model the account cannot use, the service takes no request, no request made), its words, and the numbers for the history |
 | `Probe` | `agy -p /usage`: the plan's usage windows and whether the login answers. It asks the model nothing, so it costs no usage |
+| `GetLogin` | The login's email for the account's card, from the line that each start of `agy` writes into its own log. No process is started |
 | `Compact` | `/compact` on a held session, with the run's model and settings |
 | `ReadStep` | The tool a run starts, with its command or its file |
 | `ReadEnd` | Why a run ended: its status, its error, or the action that nobody could approve |
@@ -88,7 +89,7 @@ The page's Details tab shows the same under Coding tool.
 | A usage reading inside a run's log | The log holds none; only `/usage` does | A worker reads the usage with `/usage` when a run ends, and before it takes a job when the last reading is older than 30 minutes. A stop line is not seen while a run works. The page's Ping shows that the login answers and reads the usage too |
 | Several accounts on one PC | One login for each OS user | Every account of the page is the same login |
 | Sign-in and sign-out from the page | The first sign-in needs a terminal | The page offers none |
-| The plan's name and size | Not in a file | Every account counts as signed in, on a plan of size 1 |
+| The plan's name and size, and whether the login is signed in | Not in a file: the sign-in is in the OS keyring | Every account counts as signed in, on a plan of size 1. The card shows the login's email, read from `agy`'s own log; with no log that names it, the card shows none |
 | A cap for one run, a cost in money, an advisor, a compact size, an effort beside the model | None | Left out |
 | MCP servers of the plugins | Read from a file inside the checkout | Not handed over. The worker's log names each one |
 
