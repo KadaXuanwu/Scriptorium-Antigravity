@@ -166,6 +166,9 @@ try {
     $command = & $hooks.GetCommand (New-Context @{ Run = $held })
     Assert-Equal ($command.Arguments -join ' ') "-p `"Go on.`" --output-format stream-json --model gemini-3.8-flash-medium --settings `"$settingsFile`" --conversation c-7" 'the arguments of a resumed run'
     Assert-Equal "$(Get-Content $settingsFile -Raw) $($said.Count)" '{"permissions":{"allow":[]}} 0' 'no rule, and nothing in the log'
+    # With no effort, the model's name goes as it is.
+    $held.Model = 'gemini-3.8-flash-low'; $held.Effort = ''
+    Assert-Equal (@((& $hooks.GetCommand (New-Context @{ Run = $held })).Arguments)[5]) 'gemini-3.8-flash-low' 'a run with no effort'
 
     # A probe and a compaction, with the stand-in.
     $probe = & $hooks.Probe (New-Context @{ Login = ''; Dir = $root })
