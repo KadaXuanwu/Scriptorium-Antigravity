@@ -1,19 +1,15 @@
 {
-  "updated": "2026-11-25",
+  "updated": "2026-11-26",
   "models": {
-    "gemini-4-hydrogen-xhigh": { "title": "Gemini 4 Hydrogen, xhigh" },
-    "gemini-4-hydrogen-high": { "title": "Gemini 4 Hydrogen, high" },
-    "gemini-4-hydrogen-medium": { "title": "Gemini 4 Hydrogen, medium" },
-    "gemini-4-hydrogen-low": { "title": "Gemini 4 Hydrogen, low" },
-    "gemini-3.8-flash-high": { "title": "Gemini 3.8 Flash, high" },
-    "gemini-3.8-flash-medium": { "title": "Gemini 3.8 Flash, medium" },
-    "gemini-3.8-flash-low": { "title": "Gemini 3.8 Flash, low" }
+    "gemini-4-hydrogen": { "title": "Gemini 4 Hydrogen", "effort": "medium", "efforts": ["low", "medium", "high", "xhigh"] },
+    "gemini-3.8-flash": { "title": "Gemini 3.8 Flash", "effort": "medium", "efforts": ["low", "medium", "high"] }
   },
+  "efforts": ["low", "medium", "high", "xhigh"],
   "complexities": {
-    "low": { "models": ["gemini-3.8-flash-high"] },
-    "medium": { "models": ["gemini-4-hydrogen-medium"] },
-    "high": { "models": ["gemini-4-hydrogen-high"] },
-    "design": { "models": ["gemini-4-hydrogen-xhigh"] }
+    "low": { "models": ["gemini-3.8-flash@high"] },
+    "medium": { "models": ["gemini-4-hydrogen@medium"] },
+    "high": { "models": ["gemini-4-hydrogen@high"] },
+    "design": { "models": ["gemini-4-hydrogen@xhigh"] }
   },
   "windows": {
     "gemini-weekly": { "title": "Week", "seconds": 604800, "keep": true }

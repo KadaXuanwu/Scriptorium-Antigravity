@@ -40,7 +40,12 @@ try {
     $named = @($models.complexities.PSObject.Properties | ForEach-Object { $_.Value.models }) | ForEach-Object { ($_ -split '@')[0] }
     Assert-Equal @($named | Where-Object { -not $models.models.$_ }).Count 0 'every model that the list names is in it'
     Assert-Equal (@('low', 'medium', 'high', 'design') | Where-Object { -not $models.complexities.$_ }).Count 0 'the base''s four complexities'
-    Assert-Equal "$(@($models.windows.PSObject.Properties.Name) -join ',') $($models.windows.'gemini-weekly'.keep) $($null -eq $models.efforts)" 'gemini-weekly True True' 'the week of the Gemini models, and no efforts: a model''s name holds its effort'
+    Assert-Equal "$(@($models.windows.PSObject.Properties.Name) -join ',') $($models.windows.'gemini-weekly'.keep)" 'gemini-weekly True' 'the week of the Gemini models'
+    # Each model with the efforts agy has for it (`agy models`, 2026-11-25): joined, the names agy takes, and no other.
+    $joined = @($models.models.PSObject.Properties | ForEach-Object { $name = $_.Name; $_.Value.efforts | ForEach-Object { "$name-$_" } })
+    Assert-Equal ($joined -join ',') 'gemini-4-hydrogen-low,gemini-4-hydrogen-medium,gemini-4-hydrogen-high,gemini-4-hydrogen-xhigh,gemini-3.8-flash-low,gemini-3.8-flash-medium,gemini-3.8-flash-high' 'each model and effort as agy names it'
+    $picks = @($models.complexities.PSObject.Properties | ForEach-Object { $_.Value.models }) + @($models.models.PSObject.Properties | ForEach-Object { "$($_.Name)@$($_.Value.effort)" })
+    Assert-Equal @($picks | Where-Object { $model, $effort = $_ -split '@'; @($models.models.$model.efforts) -cnotcontains $effort -or @($models.efforts) -cnotcontains $effort }).Count 0 'every effort a pick names is the model''s own and in the list'
 
     # A run that did its job: a file written, a command that fails in the sandbox and passes outside it, the run's
     # words in pieces, a compaction, the result.
@@ -123,10 +128,10 @@ try {
 
     # The command of a run: the prompt, the log's form, the model, the run's settings, the other folder. The settings
     # hold the run's commands as rules (two each: by its start, and a pattern for the whole line, which a Windows
-    # shell needs) and the project's rules in Antigravity's syntax, not another tool's. No effort,
-    # no variable, and a line in the worker's log for the MCP server it does not hand over.
+    # shell needs) and the project's rules in Antigravity's syntax, not another tool's. The effort
+    # joined to the model, no variable, and a line in the worker's log for the MCP server it does not hand over.
     $run = @{
-        Prompt = 'Do ticket #5.'; Session = ''; Model = 'gemini-4-hydrogen-high'; Effort = ''; Advisor = ''; CompactAt = 0; Cap = 0
+        Prompt = 'Do ticket #5.'; Session = ''; Model = 'gemini-4-hydrogen'; Effort = 'high'; Advisor = ''; CompactAt = 0; Cap = 0
         Login = 'C:/logins/a'; Commands = @('git', 'gh', 'unity command'); Tools = @('Bash(dotnet:*)', 'read_url(github.com)', 'mcp__Docs')
         Dir = $root; AddDirs = @('D:/Work/App-w1'); McpServers = [ordered]@{ Docs = @{ command = 'docs' } }
     }
@@ -157,7 +162,7 @@ try {
     Assert-Equal "$($command.Env.Count) $($said[-1])" '0 Antigravity gets no MCP servers from the plugins yet: Docs' 'no variable, and the MCP server named in the log'
     # A resumed run with no MCP server and no rule.
     $said.Clear()
-    $held = @{ Prompt = 'Go on.'; Session = 'c-7'; Model = 'gemini-3.8-flash-medium'; Effort = ''; Login = ''; Commands = @(); Tools = @(); Dir = $root; AddDirs = @(); McpServers = @{} }
+    $held = @{ Prompt = 'Go on.'; Session = 'c-7'; Model = 'gemini-3.8-flash'; Effort = 'medium'; Login = ''; Commands = @(); Tools = @(); Dir = $root; AddDirs = @(); McpServers = @{} }
     $command = & $hooks.GetCommand (New-Context @{ Run = $held })
     Assert-Equal ($command.Arguments -join ' ') "-p `"Go on.`" --output-format stream-json --model gemini-3.8-flash-medium --settings `"$settingsFile`" --conversation c-7" 'the arguments of a resumed run'
     Assert-Equal "$(Get-Content $settingsFile -Raw) $($said.Count)" '{"permissions":{"allow":[]}} 0' 'no rule, and nothing in the log'

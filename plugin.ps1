@@ -194,7 +194,9 @@ function Get-RunCommand($ctx, [switch] $Compact) {
     $runSettings = Join-Path $ctx.QueueDir 'run-settings.json'
     [System.IO.File]::WriteAllText($runSettings, '{"permissions":{"allow":' + (ConvertTo-Json -InputObject @($rules | Select-Object -Unique) -Compress) + '}}')
     $prompt = if ($Compact) { '/compact' } else { "`"$($run.Prompt)`"" }
-    $arguments = @('-p', $prompt, '--output-format', 'stream-json', '--model', $run.Model, '--settings', "`"$runSettings`"")
+    # agy names a model and its effort as one model (`gemini-4-hydrogen-high`); models.json lists them apart.
+    $model = if ($run.Effort) { "$($run.Model)-$($run.Effort)" } else { $run.Model }
+    $arguments = @('-p', $prompt, '--output-format', 'stream-json', '--model', $model, '--settings', "`"$runSettings`"")
     if ($run.Session) {
         $arguments += @('--conversation', $run.Session)
     }

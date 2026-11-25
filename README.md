@@ -50,9 +50,10 @@ set are that provider's.
 | `ReadStep` | The tool a run starts, with its command or its file |
 | `ReadEnd` | Why a run ended: its status, its error, or the action that nobody could approve |
 
-`models.json` holds the models, which one a complexity runs on, and the usage window. A model's name holds its effort
-(`agy models` lists them), so runs have no effort of their own. The list is the Gemini models of a free plan; a paid
-plan has more. A project whose default provider is this plugin sets its own under `complexities` in its
+`models.json` holds the models, which one a complexity runs on, and the usage window. `agy` names a model and its
+effort as one model (`agy models` lists them: `gemini-4-hydrogen-high`); the list holds each model with its own
+efforts, so a worker's Config offers the two apart, and a run joins them into `agy`'s name. The list is the Gemini
+models of a free plan; a paid plan has more. A project whose default provider is this plugin sets its own under `complexities` in its
 `scriptorium.json`. In every other project, an Antigravity worker runs on this file's list.
 
 ## Permissions
@@ -82,15 +83,13 @@ The review still runs for a line that a rule covers, so the rules save none of i
 
 ## What Antigravity does not give
 
-The page's Details tab shows the same under Coding tool.
-
 | Feature of the base | With Antigravity | So |
 | ------------------- | ---------------- | -- |
 | A usage reading inside a run's log | The log holds none; only `/usage` does | A worker reads the usage with `/usage` when a run ends, and before it takes a job when the last reading is older than 30 minutes. A stop line is not seen while a run works. The page's Ping shows that the login answers and reads the usage too |
 | Several accounts on one PC | One login for each OS user | Every account of the page is the same login |
 | Sign-in and sign-out from the page | The first sign-in needs a terminal | The page offers none |
 | The plan's name and size, and whether the login is signed in | Not in a file: the sign-in is in the OS keyring | Every account counts as signed in, on a plan of size 1. The card shows the login's email, read from `agy`'s own log; with no log that names it, the card shows none |
-| A cap for one run, a cost in money, an advisor, a compact size, an effort beside the model | None | Left out |
+| A cap for one run, a cost in money, an advisor, a compact size | None | Left out |
 | MCP servers of the plugins | Read from a file inside the checkout | Not handed over. The worker's log names each one |
 
 ## Proven and not
