@@ -204,10 +204,33 @@ function Get-RunCommand($ctx, [switch] $Compact) {
     return @{ FilePath = (Get-Command agy).Source; Arguments = $arguments; Env = @{} }
 }
 
+# The email of the login, from agy's own logs in $dir: each start that signs in writes a line with it. The newest of
+# the last five logs that has the line counts, since a start that has not signed in yet has none. '' with no such line.
+# shortcut: a line of a log that no doc of Antigravity names. The sign-in itself is in the OS keyring, and no command
+# prints the account; read the email from the tool when it has one that does.
+function Get-LogEmail([string] $dir) {
+    $logs = @(Get-ChildItem $dir -Filter 'cli-*.log' -File -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 5)
+    foreach ($log in $logs) {
+        $found = Select-String -LiteralPath $log.FullName -Pattern 'OAuth: authenticated successfully as (\S+@\S+)' -List -ErrorAction SilentlyContinue
+        if ($found) {
+            return $found.Matches[0].Groups[1].Value
+        }
+    }
+    return ''
+}
+
 @{
     GetCommand = {
         param($ctx)
         return Get-RunCommand $ctx
+    }
+    # The login, with no process started: its email, for the account's card and for the usage reading that belongs to
+    # it. The files do not say whether it is signed in, so it counts as signed in, as with no hook; a refused run or
+    # probe says otherwise. The email is the stamp too: another account in the same login is another email.
+    GetLogin = {
+        param($ctx)
+        $email = Get-LogEmail (Join-Path $HOME '.gemini/antigravity-cli/log')
+        return @{ SignedIn = $true; Email = $email; Plan = ''; PlanSize = 1.0; Stamp = $email }
     }
     # `/usage` with nobody there: it asks the model nothing, so it costs no usage. It shows the plan's windows and
     # whether the login answers.
