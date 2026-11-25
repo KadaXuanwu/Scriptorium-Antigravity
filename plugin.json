@@ -6,5 +6,6 @@
     "description": "Runs the workers on Google's Antigravity CLI with a Google AI plan: its Gemini models and its usage window.",
     "requires": ["agy"],
     "provider": true,
-    "skills": ".agents/skills"
+    "skills": ".agents/skills",
+    "card": "card.svg"
 }

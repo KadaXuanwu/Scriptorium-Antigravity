@@ -35,6 +35,7 @@ try {
     # complexity names.
     $manifest = Get-Content (Join-Path $PSScriptRoot 'plugin.json') -Raw | ConvertFrom-Json
     Assert-Equal "$($manifest.name) $($manifest.api) $($manifest.provider) $($manifest.skills) $($manifest.requires)" 'antigravity 1 True .agents/skills agy' 'the manifest'
+    Assert-Equal (Test-Path (Join-Path $PSScriptRoot $manifest.card) -PathType Leaf) $true 'the picture behind the account cards'
     $models = Get-Content (Join-Path $PSScriptRoot 'models.json') -Raw | ConvertFrom-Json
     $named = @($models.complexities.PSObject.Properties | ForEach-Object { $_.Value.models }) | ForEach-Object { ($_ -split '@')[0] }
     Assert-Equal @($named | Where-Object { -not $models.models.$_ }).Count 0 'every model that the list names is in it'
