@@ -4,9 +4,9 @@ A provider plugin for [Scriptorium](https://github.com/KadaXuanwu/Scriptorium): 
 Google's Antigravity CLI (`agy`) with a Google AI plan.
 
 **Status: its hooks work with the real tool, and no ticket has run through it yet.** Checked on 2026-11-25 against
-agy 1.5.17 on Windows with a free plan ([Proven and not](#proven-and-not)). Scriptorium's base still needs one change
-before a project can use it beside a project on another provider: an account has no provider of its own yet, so both
-would share one account's usage records.
+agy 1.5.17 on Windows with a free plan ([Proven and not](#proven-and-not)). A worker runs on Antigravity when its
+account is an Antigravity account, beside workers on another coding tool in the same project (Scriptorium's
+`docs/QUEUE.md`, Settings, `accounts.<name>.provider`).
 
 ## What it needs
 
@@ -18,13 +18,21 @@ would share one account's usage records.
 
 ## Use it
 
-In the project's `scriptorium.json`, until the plugin is listed by name:
+1. Add the plugin to one project's `scriptorium.json`, after its other plugins, until the plugin is listed by name:
 
-```json
-"plugins": { "antigravity": { "source": "https://github.com/KadaXuanwu/Scriptorium-Antigravity" } }
-```
+   ```json
+   "antigravity": { "source": "https://github.com/KadaXuanwu/Scriptorium-Antigravity" }
+   ```
 
-Then run Scriptorium's `setup.ps1` again. A project has one provider, so take another provider's entry out.
+2. Run Scriptorium's `setup.ps1` for that project again. It installs the plugin, and the workers of every project on
+   the PC can then run on it.
+3. On the page's Accounts tab, add an account and pick Antigravity as its coding tool. The page has no sign-in for
+   it: the account is the login of `agy` in a terminal.
+4. Put a worker on that account, on its card or with Add a worker. It runs on Antigravity from its next job. A worker
+   on another tool's account stays on that tool.
+
+The first provider that a project lists is its default: the models that its `scriptorium.json` and the page's Details
+set are that provider's.
 
 ## What it does
 
@@ -38,8 +46,9 @@ Then run Scriptorium's `setup.ps1` again. A project has one provider, so take an
 | `ReadEnd` | Why a run ended: its status, its error, or the action that nobody could approve |
 
 `models.json` holds the models, which one a complexity runs on, and the usage window. A model's name holds its effort
-(`agy models` lists them), so runs have no effort of their own. The list is the Gemini models of a free plan: a paid
-plan has more, and its owner sets them under `complexities` in the project's `scriptorium.json`.
+(`agy models` lists them), so runs have no effort of their own. The list is the Gemini models of a free plan; a paid
+plan has more. A project whose default provider is this plugin sets its own under `complexities` in its
+`scriptorium.json`. In every other project, an Antigravity worker runs on this file's list.
 
 ## Permissions
 
