@@ -66,7 +66,7 @@ try {
         '{"event":"result","result":{"conversation_id":"c-7","status":"SUCCESS","response":"The ticket is done.\n","duration_seconds":30.1,"num_turns":1,"usage":{"input_tokens":18145,"output_tokens":744,"thinking_tokens":0,"cache_read_tokens":26281,"total_tokens":18889}}}'
     )
     $read = & $hooks.ReadRun (New-Context @{ Text = ($log -join "`n") })
-    Assert-Equal "$($read.Session) $($read.Ended) $($read.Error) '$($read.Kind)' $($read.Worked) $($read.Capped) $($read.Cost) $($read.Text.Trim())" "c-7 True False '' True False 0 The ticket is done." 'a run that did its job'
+    Assert-Equal "$($read.Session) $($read.Ended) $($read.Error) '$($read.Kind)' $($read.Worked) $($read.Capped) $($read.ContainsKey('Cost')) $($read.Text.Trim())" "c-7 True False '' True False False The ticket is done." 'a run that did its job'
     $n = $read.Numbers
     Assert-Equal "$($n.requests) $($n.toolCalls) $($n.first) $($n.ctxMean) $($n.ctxMax) $($n.read) $($n.compactions)" '4 2 10550 11106 12266 26281 1' 'its numbers: a request is a step with a usage, its context the input and the cache'
     # The same log with Windows line ends and a line that is no JSON.
