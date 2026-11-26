@@ -105,12 +105,12 @@ try {
     Assert-Equal (Read-End '{"conversation_id":"c-2","status":"SUCCESS","response":"Done without the web.","num_turns":1,"usage":{"total_tokens":11737},"denied_actions":[{"action":"read_url","display_name":"Web"}]}') "True False '' True 'c-2' Done without the web. | False 'refused: read_url'" 'a run that was refused an action and still finished'
     Assert-Equal (Read-End '{"conversation_id":"c-2","status":"CANCELED","response":"stopped","num_turns":1,"usage":{"total_tokens":9}}') "True True '' True 'c-2' stopped | True 'canceled'" 'a canceled run'
 
-    # The usage that `/usage` prints: the windows of the Gemini models by their buckets' ids, the share used from the
-    # share left. The other models' windows are left out.
+    # The usage that `/usage` prints: every window by its bucket's id, the share used from the share left. A window
+    # that models.json does not name is in the answer too: the base leaves it out.
     $usageLine = '{"event":"command_result","command":{"name":"usage","data":{"description":"d","groups":[{"name":"Gemini Models","buckets":[{"id":"gemini-weekly","name":"Weekly Limit Remaining","window":"weekly","remaining_fraction":0.75,"reset_time":"2026-12-02T14:18:41Z"},{"id":"gemini-5h","window":"5h","remaining_fraction":1,"reset_time":"1970-01-01T00:00:00Z"}]},{"name":"Claude and GPT models","buckets":[{"id":"3p-weekly","window":"weekly","remaining_fraction":0.5,"reset_time":"1970-01-01T00:00:00Z"}]}]}}}'
     $usageResult = '{"event":"result","result":{"conversation_id":"","status":"SUCCESS","response":"Gemini Models Weekly Limit Remaining 75 percent","duration_seconds":0,"num_turns":0,"usage":{"input_tokens":0,"total_tokens":0}}}'
     $usage = & $module { param($text) Read-UsageText $text } "$usageLine`n$usageResult"
-    Assert-Equal "$(@($usage.Windows.Keys | Sort-Object) -join ',') $($usage.Windows.'gemini-weekly'.Used) $($usage.Windows.'gemini-weekly'.ResetsAt) $($usage.Windows.'gemini-5h'.Used) $($usage.Windows.'gemini-5h'.ResetsAt) '$($usage.Refused)'" "gemini-5h,gemini-weekly 0.25 1796221121 0 0 ''" 'the usage reading'
+    Assert-Equal "$(@($usage.Windows.Keys | Sort-Object) -join ',') $($usage.Windows.'gemini-weekly'.Used) $($usage.Windows.'gemini-weekly'.ResetsAt) $($usage.Windows.'gemini-5h'.Used) $($usage.Windows.'gemini-5h'.ResetsAt) $($usage.Windows.'3p-weekly'.Used) '$($usage.Refused)'" "3p-weekly,gemini-5h,gemini-weekly 0.25 1796221121 0 0 0.5 ''" 'the usage reading'
     Assert-Equal ($null -eq (& $module { param($text) Read-UsageText $text } ($log -join "`n"))) $true 'a run''s log holds no usage'
 
     # A stand-in for the agy command, first on the PATH: the hooks name its path and never start it.

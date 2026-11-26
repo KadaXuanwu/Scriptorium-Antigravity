@@ -146,9 +146,8 @@ function Get-RunNumbers([string] $text) {
 }
 
 # The plan's usage from what `/usage` prints (its command_result event), as the base reads it: each window's share
-# used and its reset. $null for a text with none. A window's name is its bucket's id (`gemini-weekly`).
-# shortcut: only the windows of the Gemini models, the ones models.json offers; the other models of a plan have
-# windows of their own (`3p-weekly`, `3p-5h`). Read those when the model list offers such a model.
+# used and its reset. $null for a text with none. A window's name is its bucket's id (`gemini-weekly`). Every bucket
+# is read: the base keeps only the windows that models.json names.
 function Read-UsageText([string] $text) {
     $line = ($text -split "`n") | Where-Object { $_ -match '"event"\s*:\s*"command_result"' } | Select-Object -Last 1
     $entry = if ($line) { Read-Event $line }
@@ -157,7 +156,7 @@ function Read-UsageText([string] $text) {
     }
     $read = @{ Windows = @{}; Refused = ''; RefusedResetsAt = 0 }
     foreach ($bucket in @($entry.command.data.groups | ForEach-Object { $_.buckets })) {
-        if ($bucket -and $bucket.id -like 'gemini-*') {
+        if ($bucket -and $bucket.id) {
             # A window that was never used resets at the year 1970.
             $resetsAt = [long][math]::Max(0, ([DateTimeOffset]::Parse([string]$bucket.reset_time, [cultureinfo]::InvariantCulture)).ToUnixTimeSeconds())
             $read.Windows[[string]$bucket.id] = @{ Used = 1 - [double]$bucket.remaining_fraction; ResetsAt = $resetsAt }
