@@ -62,7 +62,8 @@ models of a free plan; a paid plan has more. A project whose default provider is
 ## Permissions
 
 A run gets its rules for itself alone: the plugin writes them into `run-settings.json` in the worker's queue folder
-and hands that file over with `--settings`, which saves nothing. The owner's own
+and hands that file over with `--settings`, which saves nothing. `--settings` is in the tool's help (agy 1.5.17), not
+in Antigravity's docs. The owner's own
 `~/.gemini/antigravity-cli/settings.json` is never written.
 
 - Each command the base and the plugins allow becomes two rules. `git` becomes `command(git)`, which covers a line
@@ -83,7 +84,9 @@ and hands that file over with `--settings`, which saves nothing. The owner's own
   ran inside the sandbox, and an action that needed approval was refused. The run ended there, and its result named
   the action: the plugin reads that as the run's failure.
 
-Antigravity runs a command inside a sandbox that cannot write to `.git` and has no network. The run's playbook
+Antigravity runs a command inside a sandbox that cannot write to `.git` and has no network. Antigravity's docs do not
+name the sandbox: it was seen on 2026-11-25 with agy 1.5.17. A command that a rule covers may start outside it, alone
+in its call. The run's playbook
 (`PLAYBOOK.md`) therefore tells it to start each `git` and `gh` command outside the sandbox, alone in its call, and
 which lines the rules cover.
 
