@@ -265,7 +265,7 @@ function Get-LogEmail([string] $dir) {
         return 'the session is compacted.'
     }
     # The end of a run from its log: the session to resume, the result (its error, its refusal) and the run's numbers
-    # for the history. Antigravity counts no cost in money.
+    # for the history. Antigravity counts no cost in money, so the run has no Cost.
     ReadRun = {
         param($ctx)
         $text = [string]$ctx.Text
@@ -273,7 +273,7 @@ function Get-LogEmail([string] $dir) {
         $run = @{
             # The first one is the run's own: a subagent's comes later.
             Session = [regex]::Match($text, '"conversation_id"\s*:\s*"([^"]+)"').Groups[1].Value; Ended = [bool]$result
-            Error = $false; Kind = ''; Window = ''; Capped = $false; Text = ''; Worked = $false; Cost = 0.0; Numbers = $null
+            Error = $false; Kind = ''; Window = ''; Capped = $false; Text = ''; Worked = $false; Numbers = $null
         }
         try {
             $run.Numbers = Get-RunNumbers $text
