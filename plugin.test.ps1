@@ -113,15 +113,14 @@ try {
     Assert-Equal "$(@($usage.Windows.Keys | Sort-Object) -join ',') $($usage.Windows.'gemini-weekly'.Used) $($usage.Windows.'gemini-weekly'.ResetsAt) $($usage.Windows.'gemini-5h'.Used) $($usage.Windows.'gemini-5h'.ResetsAt) '$($usage.Refused)'" "gemini-5h,gemini-weekly 0.25 1796221121 0 0 ''" 'the usage reading'
     Assert-Equal ($null -eq (& $module { param($text) Read-UsageText $text } ($log -join "`n"))) $true 'a run''s log holds no usage'
 
-    # A stand-in for the agy command, first on the PATH: it prints a usage, a compaction and a result.
+    # A stand-in for the agy command, first on the PATH: the hooks name its path and never start it.
     $bin = Join-Path $root 'bin'
     New-Item -ItemType Directory -Force $bin | Out-Null
-    $lines = @($usageLine, $log[12], $usageResult)
     if ($env:OS -eq 'Windows_NT') {
-        Set-Content (Join-Path $bin 'agy.cmd') (@('@echo off') + @($lines | ForEach-Object { "echo $_" })) -Encoding ascii
+        Set-Content (Join-Path $bin 'agy.cmd') '@echo off' -Encoding ascii
         $env:PATH = "$bin;$env:PATH"
     } else {
-        Set-Content (Join-Path $bin 'agy') (@('#!/bin/sh', "cat <<'EOF'") + $lines + @('EOF')) -Encoding ascii
+        Set-Content (Join-Path $bin 'agy') '#!/bin/sh' -Encoding ascii
         & chmod +x (Join-Path $bin 'agy')
         $env:PATH = "${bin}:$env:PATH"
     }
@@ -170,12 +169,26 @@ try {
     $held.Model = 'gemini-3.8-flash-low'; $held.Effort = ''
     Assert-Equal (@((& $hooks.GetCommand (New-Context @{ Run = $held })).Arguments)[5]) 'gemini-3.8-flash-low' 'a run with no effort'
 
-    # A probe and a compaction, with the stand-in.
-    $probe = & $hooks.Probe (New-Context @{ Login = ''; Dir = $root })
+    # A probe: the base runs the command, and ReadProbe reads what it printed.
+    $probe = & $hooks.GetProbe (New-Context @{ Login = ''; Dir = $root })
+    Assert-Equal "$((Split-Path $probe.FilePath -Leaf) -replace '\.cmd$', '') $($probe.Arguments -join ' ') $($probe.Env.Count)" 'agy -p /usage --output-format stream-json 0' 'the probe command'
+    $probe = & $hooks.ReadProbe (New-Context @{ Text = "$usageLine`n$usageResult" })
     Assert-Equal "$($probe.Answered) '$($probe.Kind)' $($probe.Usage.Windows.'gemini-weekly'.Used) $($probe.Text)" "True '' 0.25 Gemini Models Weekly Limit Remaining 75 percent" 'a probe that the login answered'
-    Assert-Equal "$((Get-Location).Path -ne $root)" 'True' 'the probe leaves the folder as it was'
-    $line = & $hooks.Compact (New-Context @{ Run = $held; Log = (Join-Path $root 'compact.jsonl') })
-    Assert-Equal $line 'the session is compacted.' 'a compaction'
+    $probe = & $hooks.ReadProbe (New-Context @{ Text = '{"event":"result","result":{"conversation_id":"","status":"ERROR","response":"","error":"authentication required","num_turns":0,"usage":{"total_tokens":0}}}' })
+    Assert-Equal "$($probe.Answered) $($probe.Kind) $($null -eq $probe.Usage) $($probe.Text)" 'True login True authentication required' 'a probe of a login that is not signed in'
+    $probe = & $hooks.ReadProbe (New-Context @{ Text = '' })
+    Assert-Equal "$($probe.Answered) '$($probe.Kind)' $($null -eq $probe.Usage)" "False '' True" 'a probe that printed nothing'
+
+    # A compaction: the run's own command with /compact on the held session, and the line from what it printed. The
+    # log function is the context's own, so the line for an MCP server reaches it.
+    $said.Clear()
+    $held.McpServers = @{ Docs = @{ command = 'docs' } }
+    $command = & $hooks.GetCompact (New-Context @{ Run = $held })
+    Assert-Equal (($command.Arguments | Select-Object -First 2) -join ' ') '-p /compact' 'the compaction''s prompt'
+    Assert-Equal "$(@($command.Arguments) -join ' ' -match '--conversation c-7$') $($said[-1])" 'True Antigravity gets no MCP servers from the plugins yet: Docs' 'the compaction of the held session, and the MCP server in the log'
+    Assert-Equal (& $hooks.ReadCompact (New-Context @{ Text = ($log -join "`n") })) 'the session is compacted.' 'a compaction'
+    Assert-Equal ($null -eq (& $hooks.ReadCompact (New-Context @{ Text = ($log[0..7] -join "`n") }))) $true 'a compaction that failed gives no line'
+    Assert-Equal "$($hooks.ContainsKey('Probe')) $($hooks.ContainsKey('Compact'))" 'False False' 'the base starts the probe and the compaction'
 
     # The login's email, from agy's own logs: the newest log that has the sign-in line, a newer one without it passed
     # over; none with no log that names it, and with no folder.
