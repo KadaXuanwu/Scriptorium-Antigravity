@@ -133,8 +133,8 @@ Not proven:
    name the failed test.
 2. A run at the plan's limit: the wording is taken from the service's names for it, not from a log.
 3. A run without a login: the wording is from Antigravity's docs.
-4. A paid plan: its models, its 5-hour window (the plugin reads every `gemini-` window that `/usage` names, and
-   `models.json` knows only the week), and whether its auto mode behaves like the free plan's.
+4. A paid plan: its models, its 5-hour window (the plugin reads every window that `/usage` names, and the base
+   keeps only the ones `models.json` names: the week), and whether its auto mode behaves like the free plan's.
 5. A folder that Antigravity does not trust yet, with nobody there.
 6. macOS and Linux, and PowerShell 7 outside this repo's CI. There the rule by a command's start should count, and
    the pattern for the whole line is not tried.
