@@ -69,8 +69,16 @@ and hands that file over with `--settings`, which saves nothing. The owner's own
   by how it starts, and a pattern for the whole line: the command, then plain words and quoted text, with no chain,
   pipe, redirection or command inside the command. Antigravity takes the first only in a shell whose lines it can
   split into words. In Windows PowerShell a rule must cover the whole line, so there the second one counts.
-- A rule from `allowedTools` in `scriptorium.json` is handed on when it is in Antigravity's syntax
-  (`read_url(github.com)`), and left out when it is another tool's.
+- Rules in Antigravity's own syntax go in this plugin's entry in `scriptorium.json`, under `allowedTools`. Only
+  Antigravity reads them there, and they are handed on as they are:
+
+  ```json
+  "plugins": { "antigravity": { "allowedTools": ["command(dotnet)", "read_url(github.com)"] } }
+  ```
+
+- `allowedTools` at the top of `scriptorium.json` and the rules other plugins give are the older form: every provider
+  gets them. A rule of that form is handed on when it is in Antigravity's syntax (`read_url(github.com)`), and left out
+  when it is another tool's.
 - No mode is set. Seen with nobody there on a free plan: file edits ran, a command with no rule (`dotnet --version`)
   ran inside the sandbox, and an action that needed approval was refused. The run ended there, and its result named
   the action: the plugin reads that as the run's failure.

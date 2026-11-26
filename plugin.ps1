@@ -172,8 +172,9 @@ function Read-UsageText([string] $text) {
 # - No `--mode`. Seen with nobody there on a free plan: file edits and a command with no rule ran, and an action that
 #   needed approval was refused and ended the run: the result names it (`denied_actions`). `--mode auto` printed that
 #   the account has no such mode; a run with no mode is in Auto mode all the same, as Antigravity's own log names it.
-# - The rules: two for each command of the run, and each rule that the project gives in Antigravity's own syntax. A
-#   rule in another tool's syntax is left out. `command(git)` covers a line by how it starts, which Antigravity
+# - The rules: two for each command of the run, the rules of this plugin's own setting `allowedTools` as they are, and
+#   each rule of the older form (the project's and the other plugins') in Antigravity's own syntax. A rule in another
+#   tool's syntax is left out. `command(git)` covers a line by how it starts, which Antigravity
 #   allows only in a shell whose lines it can split into words. In Windows PowerShell and cmd a rule must cover the
 #   whole line, so the second rule is a pattern for the whole line (Antigravity's docs: permissions, CLI
 #   cross-platform command matching). Seen without it on Windows: no `git` line had a rule, each waited for Auto
@@ -190,6 +191,7 @@ function Get-RunCommand($ctx, [switch] $Compact) {
             "command($_)"
             "command(regex:$([regex]::Escape($_) -replace '\\ ', ' ')$RuleWords)"
         }) +
+        @($ctx.Settings.allowedTools | Where-Object { $_ } | ForEach-Object { [string]$_ }) +
         @($run.Tools | Where-Object { $_ -match "^($RuleActions)\(.+\)$" })
     $runSettings = Join-Path $ctx.QueueDir 'run-settings.json'
     [System.IO.File]::WriteAllText($runSettings, '{"permissions":{"allow":' + (ConvertTo-Json -InputObject @($rules | Select-Object -Unique) -Compress) + '}}')
