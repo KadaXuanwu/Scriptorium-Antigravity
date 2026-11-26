@@ -235,36 +235,30 @@ function Get-LogEmail([string] $dir) {
         return @{ SignedIn = $true; Email = $email; Plan = ''; PlanSize = 1.0; Stamp = $email }
     }
     # `/usage` with nobody there: it asks the model nothing, so it costs no usage. It shows the plan's windows and
-    # whether the login answers.
-    Probe = {
+    # whether the login answers. The base runs it, with a time limit.
+    GetProbe = {
         param($ctx)
-        $ErrorActionPreference = 'Continue'
-        Push-Location ([string]$ctx.Dir)
-        try {
-            $text = (& agy -p /usage --output-format stream-json 2>$null) -join "`n"
-        } finally {
-            Pop-Location
-        }
-        $result = Read-Result ([string]$text)
+        return @{ FilePath = (Get-Command agy).Source; Arguments = @('-p', '/usage', '--output-format', 'stream-json'); Env = @{} }
+    }
+    ReadProbe = {
+        param($ctx)
+        $text = [string]$ctx.Text
+        $result = Read-Result $text
         return @{
-            Usage = Read-UsageText ([string]$text); Answered = [bool]$result
+            Usage = Read-UsageText $text; Answered = [bool]$result
             Kind = (Get-Refusal $result); Text = [string]$(if ($result) { Get-ResultText $result })
         }
     }
-    # `/compact` on the held session, with the run's own model and settings. It returns a line for the worker's log.
-    Compact = {
+    # `/compact` on the held session, with the run's own model and settings. The base runs it, with a time limit.
+    GetCompact = {
         param($ctx)
-        $command = Get-RunCommand $ctx -Compact
-        $log = [string]$ctx.Log
-        $process = Start-Process $command.FilePath -ArgumentList $command.Arguments -WorkingDirectory $ctx.Run.Dir -NoNewWindow `
-            -PassThru -RedirectStandardOutput $log -RedirectStandardError "$log.err"
-        if (-not $process.WaitForExit(600000)) {
-            $process.Kill()
-            return 'no end after 10 minutes, stopped; the session resumes whole.'
-        }
-        $text = if (Test-Path $log) { [System.IO.File]::ReadAllText($log) } else { '' }
-        if ((Get-RunNumbers $text).compactions -lt 1) {
-            return 'failed; the session resumes whole.'
+        return Get-RunCommand $ctx -Compact
+    }
+    # A line for the worker's log, none for a compaction that failed.
+    ReadCompact = {
+        param($ctx)
+        if ((Get-RunNumbers ([string]$ctx.Text)).compactions -lt 1) {
+            return $null
         }
         return 'the session is compacted.'
     }

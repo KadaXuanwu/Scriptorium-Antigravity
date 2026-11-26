@@ -15,7 +15,8 @@ account is an Antigravity account, beside workers on another coding tool in the 
   [Antigravity's Quickstart](https://www.antigravity.google/docs/getting-started/).
 - One sign-in: run `agy` once in a terminal, sign in with the Google account and trust the folder that holds the
   project and its worker copies. Antigravity keeps the login in the OS keyring, and a run with nobody there uses it.
-- Scriptorium with provider plugins (its `docs/PLUGINS.md`, A provider).
+- Scriptorium with provider plugins (its `docs/PLUGINS.md`, A provider), with the hooks `GetProbe` and `GetCompact`.
+  An older base finds no probe and no compaction here.
 
 ## Use it
 
@@ -44,9 +45,11 @@ set are that provider's.
 | ---- | ---- |
 | `GetCommand` | The command of a run: `agy -p` with the prompt, `--output-format stream-json`, the model, `--settings` with the run's own rules, `--conversation` for a session to resume, and `--add-dir` for each other folder |
 | `ReadRun` | The run's end from its log: the session, whether it ended, its error and why (not signed in, a model the account cannot use, the service takes no request, no request made), its words, and the numbers for the history |
-| `Probe` | `agy -p /usage`: the plan's usage windows and whether the login answers. It asks the model nothing, so it costs no usage |
+| `GetProbe` | Gives the base `agy -p /usage`: the plan's usage windows and whether the login answers. It asks the model nothing, so it costs no usage. The base runs it, with a time limit |
+| `ReadProbe` | Reads the usage windows and the refusal from what the probe printed |
 | `GetLogin` | The login's email for the account's card, from the line that each start of `agy` writes into its own log. No process is started |
-| `Compact` | `/compact` on a held session, with the run's model and settings |
+| `GetCompact` | Gives the base `/compact` on a held session, with the run's model and settings. The base runs it, with a time limit |
+| `ReadCompact` | Reads from what the compaction printed whether the session is compacted. Gives no line for one that failed |
 | `ReadStep` | The tool a run starts, with its command or its file |
 | `ReadEnd` | Why a run ended: its status, its error, or the action that nobody could approve |
 
