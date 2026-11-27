@@ -129,9 +129,10 @@ Proven with agy 1.5.17 on Windows, a free plan, on 2026-11-25:
 - An unknown model, and the service's own shortage (error 503) in the middle of a session. The plugin reads the
   shortage as a limit: the base holds the job with its session and resumes it after 30 minutes.
 - A model's name with `--effort` beside it is refused.
-- On a paid plan, one prompt with no tool on a model that the free plan lacks, and one on a model with no efforts.
-- On a paid plan, `/usage` with nobody there: the 5 hours and the week of the Gemini models, each with its share
-  left and its reset.
+- With agy 1.5.18 on a paid plan, on 2026-11-27: one prompt with no tool on a model that the free plan lacks, and
+  one on a model with no efforts.
+- With agy 1.5.18 on a paid plan, on 2026-11-27, `/usage` with nobody there: the 5 hours and the week of the Gemini
+  models, each with its share left and its reset.
 
 Not proven:
 
