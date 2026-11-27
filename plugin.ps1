@@ -67,9 +67,11 @@ function Test-Failed($result) {
 # (not signed in), 'model' (the account cannot use the model), 'limit' (the service takes no request now: the run is
 # held and resumes later) or 'start' (the session made no request, for a cause the text does not name). '' for the
 # run's own failure or no error.
-# Seen: "... (UNAVAILABLE (code 503): No capacity available for model ...)", the service's own shortage.
-# shortcut: the wording at a plan's limit was not seen. RESOURCE_EXHAUSTED and code 429 are the service's names for it
-# in the same form as the 503; check them against a real log (README.md, Proven and not).
+# Seen: "... (UNAVAILABLE (code 503): No capacity available for model ...)", the service's own shortage. And at the
+# 5-hour limit of a paid plan (agy 1.5.18, 2026-11-27): "Individual quota reached. Please upgrade your subscription to
+# increase your limits. Resets in 2h28m33s." The service's names for it (RESOURCE_EXHAUSTED, code 429) were only in
+# what agy wrote to its errors, not in the result; they stay in the pattern for a result that has them.
+# shortcut: the wording at the week's limit was not seen; check it against a real log (README.md, Proven and not).
 function Get-Refusal($result) {
     if (-not $result -or $result.status -eq 'SUCCESS') {
         return ''
@@ -81,7 +83,7 @@ function Get-Refusal($result) {
     if ($text -match 'invalid model') {
         return 'model'
     }
-    if ($text -match 'UNAVAILABLE \(code 503\)|RESOURCE_EXHAUSTED|\(code 429\)') {
+    if ($text -match 'UNAVAILABLE \(code 503\)|RESOURCE_EXHAUSTED|\(code 429\)|quota reached') {
         return 'limit'
     }
     return $(if ([long]$result.usage.total_tokens -gt 0) { '' } else { 'start' })
