@@ -55,9 +55,12 @@ set are that provider's.
 
 `models.json` holds the models, which one a complexity runs on, and the usage window. `agy` names a model and its
 effort as one model (`agy models` lists them: `gemini-4-hydrogen-high`); the list holds each model with its own
-efforts, so a worker's Config offers the two apart, and a run joins them into `agy`'s name. The list is the Gemini
-models of a free plan; a paid plan has more. A project whose default provider is this plugin sets its own under `complexities` in its
-`scriptorium.json`. In every other project, an Antigravity worker runs on this file's list.
+efforts, so a worker's Config offers the two apart, and a run joins them into `agy`'s name. A model with no efforts
+(`"efforts": []`) runs under its own name. The list is the models of Antigravity's Gemini usage group on a paid plan:
+a free plan has only some of them, and the complexities' own picks are among those. The models of its other usage
+group (other makers' models) are not in the list: they have usage windows of their own, and the base would count
+their runs against the Gemini week. A project whose default provider is this plugin sets its own under
+`complexities` in its `scriptorium.json`. In every other project, an Antigravity worker runs on this file's list.
 
 ## Permissions
 
@@ -125,6 +128,7 @@ Proven with agy 1.5.17 on Windows, a free plan, on 2026-11-25:
 - An unknown model, and the service's own shortage (error 503) in the middle of a session. The plugin reads the
   shortage as a limit: the base holds the job with its session and resumes it after 30 minutes.
 - A model's name with `--effort` beside it is refused.
+- On a paid plan, one prompt with no tool on a model that the free plan lacks, and one on a model with no efforts.
 
 Not proven:
 
@@ -133,8 +137,9 @@ Not proven:
    name the failed test.
 2. A run at the plan's limit: the wording is taken from the service's names for it, not from a log.
 3. A run without a login: the wording is from Antigravity's docs.
-4. A paid plan: its models, its 5-hour window (the plugin reads every window that `/usage` names, and the base
-   keeps only the ones `models.json` names: the week), and whether its auto mode behaves like the free plan's.
+4. A paid plan: a whole ticket on one of its models, a model that the account's plan lacks (the wording of its
+   refusal), its 5-hour window (the plugin reads every window that `/usage` names, and the base keeps only the ones
+   `models.json` names: the week), and whether its auto mode behaves like the free plan's.
 5. A folder that Antigravity does not trust yet, with nobody there.
 6. macOS and Linux, and PowerShell 7 outside this repo's CI. There the rule by a command's start should count, and
    the pattern for the whole line is not tried.

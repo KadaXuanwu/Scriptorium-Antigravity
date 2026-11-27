@@ -41,10 +41,14 @@ try {
     Assert-Equal @($named | Where-Object { -not $models.models.$_ }).Count 0 'every model that the list names is in it'
     Assert-Equal (@('low', 'medium', 'high', 'design') | Where-Object { -not $models.complexities.$_ }).Count 0 'the base''s four complexities'
     Assert-Equal "$(@($models.windows.PSObject.Properties.Name) -join ',') $($models.windows.'gemini-weekly'.keep)" 'gemini-weekly True' 'the week of the Gemini models'
-    # Each model with the efforts agy has for it (`agy models`, 2026-11-25): joined, the names agy takes, and no other.
-    $joined = @($models.models.PSObject.Properties | ForEach-Object { $name = $_.Name; $_.Value.efforts | ForEach-Object { "$name-$_" } })
-    Assert-Equal ($joined -join ',') 'gemini-4-hydrogen-low,gemini-4-hydrogen-medium,gemini-4-hydrogen-high,gemini-4-hydrogen-xhigh,gemini-3.8-flash-low,gemini-3.8-flash-medium,gemini-3.8-flash-high' 'each model and effort as agy names it'
-    $picks = @($models.complexities.PSObject.Properties | ForEach-Object { $_.Value.models }) + @($models.models.PSObject.Properties | ForEach-Object { "$($_.Name)@$($_.Value.effort)" })
+    # Each model with the efforts agy has for it (`agy models`, 2026-11-27, a paid plan): joined, the names agy takes
+    # for the models of its Gemini usage group, and no other. A model with no efforts goes by its own name.
+    $bare = @($models.models.PSObject.Properties | Where-Object { -not @($_.Value.efforts).Count } | ForEach-Object { $_.Name })
+    $joined = @($models.models.PSObject.Properties | ForEach-Object { $name = $_.Name; if ($bare -contains $name) { $name } else { $_.Value.efforts | ForEach-Object { "$name-$_" } } })
+    Assert-Equal ($joined -join ',') 'gemini-4-neon-low,gemini-4-neon-medium,gemini-4-neon-high,gemini-4-neon-xhigh,gemini-4-carbon-low,gemini-4-carbon-medium,gemini-4-carbon-high,gemini-4-argon-low,gemini-4-argon-medium,gemini-4-argon-high,gemini-4-hydrogen-low,gemini-4-hydrogen-medium,gemini-4-hydrogen-high,gemini-4-hydrogen-xhigh,gemini-pro-orchestrator-neon,gemini-pro-orchestrator,gemini-pro-orchestrator-argon,gemini-3.8-flash-low,gemini-3.8-flash-medium,gemini-3.8-flash-high' 'each model and effort as agy names it'
+    # A model with no efforts says so itself (`[]`: left out, it would get the list's) and has no effort to join.
+    Assert-Equal @($bare | Where-Object { -not $models.models.$_.PSObject.Properties['efforts'] -or $models.models.$_.effort }).Count 0 'a model with no efforts has an empty list and no effort'
+    $picks = @($models.complexities.PSObject.Properties | ForEach-Object { $_.Value.models }) + @($models.models.PSObject.Properties | Where-Object { $bare -notcontains $_.Name } | ForEach-Object { "$($_.Name)@$($_.Value.effort)" })
     Assert-Equal @($picks | Where-Object { $model, $effort = $_ -split '@'; @($models.models.$model.efforts) -cnotcontains $effort -or @($models.efforts) -cnotcontains $effort }).Count 0 'every effort a pick names is the model''s own and in the list'
 
     # A run that did its job: a file written, a command that fails in the sandbox and passes outside it, the run's
