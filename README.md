@@ -133,17 +133,21 @@ Proven with agy 1.5.17 on Windows, a free plan, on 2026-11-25:
   one on a model with no efforts.
 - With agy 1.5.18 on a paid plan, on 2026-11-27, `/usage` with nobody there: the 5 hours and the week of the Gemini
   models, each with its share left and its reset.
+- With agy 1.5.18 on a paid plan, on 2026-11-27: the wording of a run that reaches its 5-hour limit, after two hours
+  of work ("Individual quota reached"). The plugin reads it as a limit. That run was judged before the plugin knew
+  the wording, so its hold and its resume were not seen.
 
 Not proven:
 
 1. A ticket whose checks must pass inside the sandbox. Scriptorium's own `check.ps1` fails there: one test starts
    a background job, which the sandbox denies. The run opened its pull request all the same, and its text did not
    name the failed test.
-2. A run at the plan's limit: the wording is taken from the service's names for it, not from a log.
+2. A run at the week's limit: its wording was not seen. A run held at the 5-hour limit and resumed after the reset,
+   and a run that ends at the workers' stop line: neither was seen yet.
 3. A run without a login: the wording is from Antigravity's docs.
 4. A paid plan: a whole ticket on one of its models, a model that the account's plan lacks (the wording of its
-   refusal), a run that reaches its 5-hour limit (`/usage` gave that window a reset time on a paid plan; on a free
-   plan it read as never used, which the base counts as nothing used), and whether its auto mode behaves like the
+   refusal), the 5-hour window on a free plan (`/usage` read it as never used there, which the base counts as
+   nothing used), and whether its auto mode behaves like the
    free plan's. The plugin reads every window that `/usage` names, and the base keeps only the ones `models.json`
    names: not the other usage group's.
 5. A folder that Antigravity does not trust yet, with nobody there.
