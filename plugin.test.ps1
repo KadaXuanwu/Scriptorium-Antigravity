@@ -40,7 +40,9 @@ try {
     $named = @($models.complexities.PSObject.Properties | ForEach-Object { $_.Value.models }) | ForEach-Object { ($_ -split '@')[0] }
     Assert-Equal @($named | Where-Object { -not $models.models.$_ }).Count 0 'every model that the list names is in it'
     Assert-Equal (@('low', 'medium', 'high', 'design') | Where-Object { -not $models.complexities.$_ }).Count 0 'the base''s four complexities'
-    Assert-Equal "$(@($models.windows.PSObject.Properties.Name) -join ',') $($models.windows.'gemini-weekly'.keep)" 'gemini-weekly True' 'the week of the Gemini models'
+    # The two windows of the Gemini models, by the ids of `/usage`. Neither is a window of some models (`models`):
+    # both hold every model of the list.
+    Assert-Equal "$(@($models.windows.PSObject.Properties | ForEach-Object { "$($_.Name)=$($_.Value.seconds)/$([bool]$_.Value.keep)/$([bool]$_.Value.models)" }) -join ' ')" 'gemini-5h=18000/False/False gemini-weekly=604800/True/False' 'the 5 hours and the week of the Gemini models'
     # Each model with the efforts agy has for it (`agy models`, 2026-11-27, a paid plan): joined, the names agy takes
     # for the models of its Gemini usage group, and no other. A model with no efforts goes by its own name.
     $bare = @($models.models.PSObject.Properties | Where-Object { -not @($_.Value.efforts).Count } | ForEach-Object { $_.Name })

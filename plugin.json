@@ -3,7 +3,7 @@
     "title": "Scriptorium for Antigravity",
     "version": "0.1.0",
     "api": 1,
-    "description": "Runs the workers on Google's Antigravity CLI with a Google AI plan: its Gemini models and its usage window.",
+    "description": "Runs the workers on Google's Antigravity CLI with a Google AI plan: its Gemini models and its usage windows.",
     "requires": ["agy"],
     "provider": true,
     "skills": ".agents/skills",
