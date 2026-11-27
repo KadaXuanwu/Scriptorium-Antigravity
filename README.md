@@ -103,7 +103,7 @@ The review still runs for a line that a rule covers, so the rules save none of i
 
 | Feature of the base | With Antigravity | So |
 | ------------------- | ---------------- | -- |
-| A usage reading inside a run's log | The log holds none; only `/usage` does | A worker reads the usage with `/usage` when a run ends, and before it takes a job when the last reading is older than 30 minutes. A stop line is not seen while a run works. The page's Ping shows that the login answers and reads the usage too |
+| A usage reading inside a run's log | The log holds none; only `/usage` does | A worker reads the usage with `/usage`: before it takes a job when the last reading is older than 30 minutes, every few minutes while a run works (the base's `$RunProbeSeconds`), and when a run ends. So the page shows a run's usage and the stop line ends it. Each reading starts `agy` once, which writes one more log file. The page's Ping shows that the login answers and reads the usage too |
 | Several accounts on one PC | One login for each OS user | Every account of the page is the same login |
 | Sign-in and sign-out from the page | The first sign-in needs a terminal | The page offers none |
 | The plan's name and size, and whether the login is signed in | Not in a file: the sign-in is in the OS keyring | Every account counts as signed in, on a plan of size 1. The card shows the login's email, read from `agy`'s own log; with no log that names it, the card shows none |
