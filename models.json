@@ -1,7 +1,13 @@
 {
-  "updated": "2026-11-26",
+  "updated": "2026-11-27",
   "models": {
+    "gemini-4-neon": { "title": "Gemini 4 Neon", "effort": "medium", "efforts": ["low", "medium", "high", "xhigh"] },
+    "gemini-4-carbon": { "title": "Gemini 4 Carbon", "effort": "medium", "efforts": ["low", "medium", "high"] },
+    "gemini-4-argon": { "title": "Gemini 4 Argon", "effort": "medium", "efforts": ["low", "medium", "high"] },
     "gemini-4-hydrogen": { "title": "Gemini 4 Hydrogen", "effort": "medium", "efforts": ["low", "medium", "high", "xhigh"] },
+    "gemini-pro-orchestrator-neon": { "title": "Orchestrator (Neon)", "efforts": [] },
+    "gemini-pro-orchestrator": { "title": "Orchestrator (Carbon)", "efforts": [] },
+    "gemini-pro-orchestrator-argon": { "title": "Orchestrator (Argon)", "efforts": [] },
     "gemini-3.8-flash": { "title": "Gemini 3.8 Flash", "effort": "medium", "efforts": ["low", "medium", "high"] }
   },
   "efforts": ["low", "medium", "high", "xhigh"],
