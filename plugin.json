@@ -7,5 +7,7 @@
     "requires": ["agy"],
     "provider": true,
     "skills": ".agents/skills",
-    "card": "card.svg"
+    "card": "card.svg",
+    "color": "#4285F4",
+    "icon": "icon.svg"
 }
