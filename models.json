@@ -18,6 +18,7 @@
     "design": { "models": ["gemini-4-hydrogen@xhigh"] }
   },
   "windows": {
+    "gemini-5h": { "title": "5 hours", "seconds": 18000, "stopAt": 0.98 },
     "gemini-weekly": { "title": "Week", "seconds": 604800, "keep": true }
   }
 }
