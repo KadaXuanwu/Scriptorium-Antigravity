@@ -120,6 +120,10 @@ try {
     $usage = & $module { param($text) Read-UsageText $text } "$usageLine`n$usageResult"
     Assert-Equal "$(@($usage.Windows.Keys | Sort-Object) -join ',') $($usage.Windows.'gemini-weekly'.Used) $($usage.Windows.'gemini-weekly'.ResetsAt) $($usage.Windows.'gemini-5h'.Used) $($usage.Windows.'gemini-5h'.ResetsAt) $($usage.Windows.'3p-weekly'.Used) '$($usage.Refused)'" "3p-weekly,gemini-5h,gemini-weekly 0.25 1796221121 0 0 0.5 ''" 'the usage reading'
     Assert-Equal ($null -eq (& $module { param($text) Read-UsageText $text } ($log -join "`n"))) $true 'a run''s log holds no usage'
+    # A used-up week, as agy 1.5.18 prints it: the 5 hours are `disabled` and name no reset.
+    $weekOut = '{"event":"command_result","command":{"name":"usage","data":{"groups":[{"name":"Gemini Models","buckets":[{"id":"gemini-weekly","window":"weekly","remaining_fraction":0,"reset_time":"2026-12-04T07:06:58Z"},{"id":"gemini-5h","window":"5h","disabled":true,"remaining_fraction":0.41720134019851685}]}]}}}'
+    $usage = & $module { param($text) Read-UsageText $text } $weekOut
+    Assert-Equal "$($usage.Windows.'gemini-weekly'.Used) $($usage.Windows.'gemini-weekly'.ResetsAt) $($usage.Windows.'gemini-5h'.ResetsAt)" '1 1796368018 0' 'a used-up week whose 5 hours name no reset'
 
     # A stand-in for the agy command, first on the PATH: the hooks name its path and never start it.
     $bin = Join-Path $root 'bin'
