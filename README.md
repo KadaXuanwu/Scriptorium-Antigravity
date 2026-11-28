@@ -63,6 +63,11 @@ group (other makers' models) are not in the list: they have usage windows of the
 their runs against the Gemini week. A project whose default provider is this plugin sets its own under
 `complexities` in its `scriptorium.json`. In every other project, an Antigravity worker runs on this file's list.
 
+The week has pick-up limits of its own (`pickUp`), beside the base's for the 5 hours: late in the week a worker
+takes no new ticket of a size that would not fit. A run that the week's limit cuts off holds its ticket and its areas
+until the week resets, which can be days. The limits are from one day of runs on a paid plan (2026-11-27); each
+account moves its own on the page (the Week meter).
+
 ## Permissions
 
 A run gets its rules for itself alone: the plugin writes them into `run-settings.json` in the worker's queue folder

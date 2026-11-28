@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-27",
+  "updated": "2026-11-28",
   "models": {
     "gemini-4-neon": { "title": "Gemini 4 Neon", "effort": "medium", "efforts": ["low", "medium", "high", "xhigh"] },
     "gemini-4-carbon": { "title": "Gemini 4 Carbon", "effort": "medium", "efforts": ["low", "medium", "high"] },
@@ -19,6 +19,6 @@
   },
   "windows": {
     "gemini-5h": { "title": "5 hours", "seconds": 18000, "stopAt": 0.98 },
-    "gemini-weekly": { "title": "Week", "seconds": 604800, "keep": true }
+    "gemini-weekly": { "title": "Week", "seconds": 604800, "keep": true, "pickUp": { "S": 0.95, "M": 0.85, "L": 0.75 } }
   }
 }
