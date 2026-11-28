@@ -71,7 +71,7 @@ function Test-Failed($result) {
 # 5-hour limit of a paid plan (agy 1.5.18, 2026-11-27): "Individual quota reached. Please upgrade your subscription to
 # increase your limits. Resets in 2h28m33s." The service's names for it (RESOURCE_EXHAUSTED, code 429) were only in
 # what agy wrote to its errors, not in the result; they stay in the pattern for a result that has them.
-# shortcut: the wording at the week's limit was not seen; check it against a real log (README.md, Proven and not).
+# The week's limit has the same wording (agy 1.5.18, 2026-11-28: "... Resets in 142h45m7s.").
 function Get-Refusal($result) {
     if (-not $result -or $result.status -eq 'SUCCESS') {
         return ''
@@ -87,6 +87,14 @@ function Get-Refusal($result) {
         return 'limit'
     }
     return $(if ([long]$result.usage.total_tokens -gt 0) { '' } else { 'start' })
+}
+
+# The seconds until the reset that a refusal names ("Resets in 142h45m7s", each part optional), 0 with none. The base
+# holds the run until then (ReadRun, ResetsAt) and needs no probe for it: a probe that failed once left it with a
+# blind resume every 30 minutes.
+function Get-ResetSeconds([string] $text) {
+    $match = [regex]::Match($text, 'Resets in (?=\d)(?:(\d+)h)?(?:(\d+)m(?!s))?(?:(\d+)(?:\.\d+)?s)?')
+    return [long]$match.Groups[1].Value * 3600 + [long]$match.Groups[2].Value * 60 + [long]$match.Groups[3].Value
 }
 
 # What a run does at one line of its log: the tool it starts, with its command or its first text parameter. $null for
@@ -290,6 +298,11 @@ function Get-LogEmail([string] $dir) {
             $run.Worked = [long]$result.usage.total_tokens -gt 0
             $run.Text = Get-ResultText $result
             $run.Kind = Get-Refusal $result
+            # The log is read as the run ends, so the reset is that many seconds from now.
+            $seconds = if ($run.Kind -eq 'limit') { Get-ResetSeconds $run.Text }
+            if ($seconds) {
+                $run.ResetsAt = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() + $seconds
+            }
         }
         return $run
     }
