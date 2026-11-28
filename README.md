@@ -44,7 +44,7 @@ set are that provider's.
 | Hook | What |
 | ---- | ---- |
 | `GetCommand` | The command of a run: `agy -p` with the prompt, `--output-format stream-json`, the model, `--settings` with the run's own rules, `--conversation` for a session to resume, and `--add-dir` for each other folder |
-| `ReadRun` | The run's end from its log: the session, whether it ended, its error and why (not signed in, a model the account cannot use, the service takes no request, no request made), its words, and the numbers for the history |
+| `ReadRun` | The run's end from its log: the session, whether it ended, its error and why (not signed in, a model the account cannot use, the service takes no request, no request made), its words, the reset that a refusal names ("Resets in 2h28m33s": the base holds the run until then, with no probe), and the numbers for the history |
 | `GetProbe` | Gives the base `agy -p /usage`: the plan's usage windows and whether the login answers. It asks the model nothing, so it costs no usage. The base runs it, with a time limit |
 | `ReadProbe` | Reads the usage windows and the refusal from what the probe printed |
 | `GetLogin` | The login's email for the account's card, from the line that each start of `agy` writes into its own log. No process is started |
