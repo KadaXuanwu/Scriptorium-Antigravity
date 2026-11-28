@@ -136,14 +136,18 @@ Proven with agy 1.5.17 on Windows, a free plan, on 2026-11-25:
 - With agy 1.5.18 on a paid plan, on 2026-11-27: the wording of a run that reaches its 5-hour limit, after two hours
   of work ("Individual quota reached"). The plugin reads it as a limit. That run was judged before the plugin knew
   the wording, so its hold and its resume were not seen.
+- With agy 1.5.18 on a paid plan, on 2026-11-27: a run that the workers' stop line ended at its checkpoint. Its
+  session was compacted and held, and it resumed after the 5-hour reset and opened its pull request.
+- With agy 1.5.18 on a paid plan, on 2026-11-28: a run at the week's limit, which has the 5-hour limit's wording
+  ("Individual quota reached", then "Resets in 142h45m7s"). `/usage` then gives the week with no share left, and the
+  5 hours as `disabled` with no reset: the plugin reads them as a window with no use.
 
 Not proven:
 
 1. A ticket whose checks must pass inside the sandbox. Scriptorium's own `check.ps1` fails there: one test starts
    a background job, which the sandbox denies. The run opened its pull request all the same, and its text did not
    name the failed test.
-2. A run at the week's limit: its wording was not seen. A run held at the 5-hour limit and resumed after the reset,
-   and a run that ends at the workers' stop line: neither was seen yet.
+2. A run held at the plan's own limit (the 5 hours' or the week's) and resumed after the reset: not seen yet.
 3. A run without a login: the wording is from Antigravity's docs.
 4. A paid plan: a whole ticket on one of its models, a model that the account's plan lacks (the wording of its
    refusal), the 5-hour window on a free plan (`/usage` read it as never used there, which the base counts as

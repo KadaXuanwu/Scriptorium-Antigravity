@@ -159,8 +159,11 @@ function Read-UsageText([string] $text) {
     $read = @{ Windows = @{}; Refused = ''; RefusedResetsAt = 0 }
     foreach ($bucket in @($entry.command.data.groups | ForEach-Object { $_.buckets })) {
         if ($bucket -and $bucket.id) {
-            # A window that was never used resets at the year 1970.
-            $resetsAt = [long][math]::Max(0, ([DateTimeOffset]::Parse([string]$bucket.reset_time, [cultureinfo]::InvariantCulture)).ToUnixTimeSeconds())
+            # A window that was never used resets at the year 1970. One that does not apply now names no reset
+            # (`disabled`: the 5 hours while the week is used up): 0 too, which the base counts as a window with no use.
+            # Seen with agy 1.5.18: the parse of that missing reset failed every probe, and the base resumed a refused
+            # run blind every 30 minutes.
+            $resetsAt = if ($bucket.reset_time) { [long][math]::Max(0, ([DateTimeOffset]::Parse([string]$bucket.reset_time, [cultureinfo]::InvariantCulture)).ToUnixTimeSeconds()) } else { 0 }
             $read.Windows[[string]$bucket.id] = @{ Used = 1 - [double]$bucket.remaining_fraction; ResetsAt = $resetsAt }
         }
     }
