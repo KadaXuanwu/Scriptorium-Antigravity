@@ -19,6 +19,6 @@
   },
   "windows": {
     "gemini-5h": { "title": "5 hours", "seconds": 18000, "stopAt": 0.98 },
-    "gemini-weekly": { "title": "Week", "seconds": 604800, "keep": true, "pickUp": { "S": 0.95, "M": 0.85, "L": 0.75 } }
+    "gemini-weekly": { "title": "Week", "seconds": 604800, "keep": true }
   }
 }
